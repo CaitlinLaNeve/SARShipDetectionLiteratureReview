@@ -1,0 +1,61 @@
+# This is a basic workflow to help you get started with Actions
+
+import requests
+import pandas as pd
+
+def search_springer(api_key, keywords, rows=10):
+    """
+    Search Springer journals using the Springer Nature API.
+    
+    :param api_key: Your Springer Nature API key.
+    :param keywords: List of keywords to search for.
+    :param rows: Number of results to retrieve.
+    :return: DataFrame of search results.
+    """
+    base_url = "http://api.springernature.com/metadata/json"
+    query = " ".join(keywords)
+    params = {
+        "q": query,
+        "api_key": api_key,
+        "p": rows,  # Number of results
+    }
+
+    try:
+        response = requests.get(base_url, params=params)
+        response.raise_for_status()  # Raise error for bad responses
+        data = response.json()
+        
+        # Parse relevant fields from API response
+        articles = []
+        for record in data['records']:
+            title = record.get('title', "No Title")
+            doi = record.get('doi', "No DOI")
+            journal = record.get('publicationName', "No Journal")
+            year = record.get('publicationDate', "No Date")[:4]
+            link = record.get('url', [{}])[0].get('value', "No Link")
+            
+            articles.append({
+                "Title": title,
+                "DOI": doi,
+                "Journal": journal,
+                "Year": year,
+                "Link": link,
+            })
+        
+        return pd.DataFrame(articles)
+    except Exception as e:
+        print(f"Error: {e}")
+        return pd.DataFrame()
+
+# Example usage
+if __name__ == "__main__":
+    # Replace with your Springer Nature API key
+    API_KEY = "your_springer_key"
+    keywords = ["machine learn", "SAR ship detect", "military"]
+    results = search_springer(API_KEY, keywords, rows=20)
+    
+    # Print results
+    print(results)
+
+    # Save to CSV
+    results.to_csv("springer_results.csv", index=False)
