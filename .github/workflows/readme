@@ -1,0 +1,3 @@
+#The springer_results file contains an example code to print results from a search conducted on a publishing journal, this case is Springer Nature. 
+#The user needs to obtain an API key from Springer Journal to run the code successfully
+#The file will include title, author, doi, journal, and year for each article returned on the site using the specified keywords
